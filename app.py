@@ -147,32 +147,54 @@ with col2:
                             
                             with cols[col_idx]:
                                 try:
-                                    # Decode base64 image
-                                    image_bytes = base64.b64decode(image_data.b64_json)
-                                    image = Image.open(BytesIO(image_bytes))
+                                    # Debug: Show what we received
+                                    st.write(f"Debug - Image data attributes: {dir(image_data)}")
                                     
-                                    # Display image
-                                    st.image(
-                                        image,
-                                        caption=f"Generated Image {i+1}",
-                                        use_container_width=True
-                                    )
+                                    # Try different possible attributes for the base64 data
+                                    b64_data = None
+                                    if hasattr(image_data, 'b64_json') and image_data.b64_json:
+                                        b64_data = image_data.b64_json
+                                    elif hasattr(image_data, 'base64') and image_data.base64:
+                                        b64_data = image_data.base64
+                                    elif hasattr(image_data, 'data') and image_data.data:
+                                        b64_data = image_data.data
+                                    elif hasattr(image_data, 'url') and image_data.url:
+                                        # If it's a URL instead of base64
+                                        st.image(image_data.url, caption=f"Generated Image {i+1}")
+                                        continue
                                     
-                                    # Download button
-                                    img_buffer = BytesIO()
-                                    image.save(img_buffer, format='PNG')
-                                    img_bytes = img_buffer.getvalue()
-                                    
-                                    st.download_button(
-                                        label=f"📥 Download Image {i+1}",
-                                        data=img_bytes,
-                                        file_name=f"generated_image_{i+1}.png",
-                                        mime="image/png",
-                                        use_container_width=True
-                                    )
+                                    if b64_data:
+                                        # Decode base64 image
+                                        image_bytes = base64.b64decode(b64_data)
+                                        image = Image.open(BytesIO(image_bytes))
+                                        
+                                        # Display image
+                                        st.image(
+                                            image,
+                                            caption=f"Generated Image {i+1}",
+                                            use_container_width=True
+                                        )
+                                        
+                                        # Download button
+                                        img_buffer = BytesIO()
+                                        image.save(img_buffer, format='PNG')
+                                        img_bytes = img_buffer.getvalue()
+                                        
+                                        st.download_button(
+                                            label=f"📥 Download Image {i+1}",
+                                            data=img_bytes,
+                                            file_name=f"generated_image_{i+1}.png",
+                                            mime="image/png",
+                                            use_container_width=True
+                                        )
+                                    else:
+                                        st.error(f"No image data found for image {i+1}")
+                                        st.write(f"Available attributes: {[attr for attr in dir(image_data) if not attr.startswith('_')]}")
                                     
                                 except Exception as img_error:
                                     st.error(f"Error processing image {i+1}: {str(img_error)}")
+                                    st.write(f"Image data type: {type(image_data)}")
+                                    st.write(f"Image data: {image_data}")
                     else:
                         st.error("No images were generated. Please try again.")
                         
