@@ -3,55 +3,79 @@ import base64
 from together import Together
 from io import BytesIO
 from PIL import Image
+import time
 
 # Set up the page
 st.set_page_config(page_title="Image Generation Chatbot", page_icon="🖼️")
 
-# Serverless-compatible models
+# Serverless-compatible models with recommended settings
 SERVERLESS_MODELS = {
-    "FLUX-1 (Recommended)": "black-forest-labs/FLUX.1-dev",
-    "SDXL 1.0": "stability-ai/sdxl",
-    "Playground v2": "playgroundai/playground-v2-1024px-aesthetic",
-    "Kandinsky 2.2": "kandinsky-community/kandinsky-2-2-decoder",
-    "Realistic Vision": "SG161222/Realistic_Vision_V5.1_noVAE"
+    "FLUX-1 (Best Quality)": {
+        "model": "black-forest-labs/FLUX.1-dev",
+        "max_steps": 50,
+        "default_steps": 30
+    },
+    "SDXL 1.0 (Balanced)": {
+        "model": "stability-ai/sdxl",
+        "max_steps": 50,
+        "default_steps": 25
+    },
+    "Playground v2 (Aesthetic)": {
+        "model": "playgroundai/playground-v2-1024px-aesthetic",
+        "max_steps": 50,
+        "default_steps": 20
+    }
 }
 
 # Sidebar for API key and settings
 with st.sidebar:
     st.title("🖼️ Image Generation Chatbot")
-    st.write("This chatbot generates images based on your descriptions using AI.")
+    st.write("Generate AI images from text prompts using Together AI")
     
+    # API Key Section
     if 'TOGETHER_API_KEY' in st.secrets:
-        st.success('API key already provided!', icon='✅')
+        st.success('API key loaded from secrets!', icon='✅')
         together_api = st.secrets['TOGETHER_API_KEY']
     else:
         together_api = st.text_input('Enter Together API token:', type='password')
         if not together_api:
-            st.warning('Please enter your Together API token!', icon='⚠️')
+            st.warning('Please enter your API token', icon='⚠️')
         else:
             st.success('API key entered!', icon='✅')
     
-    st.subheader("Image Settings")
-    num_images = st.slider("Number of images", 1, 4, 1)
-    steps = st.slider("Generation steps", 10, 50, 20)
+    # Model Settings
+    st.subheader("Generation Settings")
     model_name = st.selectbox(
-        "Model",
+        "Select Model",
         list(SERVERLESS_MODELS.keys()),
         index=0
     )
     
+    selected_model = SERVERLESS_MODELS[model_name]
+    steps = st.slider(
+        "Quality Steps", 
+        10, 
+        selected_model["max_steps"], 
+        selected_model["default_steps"],
+        help="More steps = better quality but slower generation"
+    )
+    
+    num_images = st.slider(
+        "Number of Images", 
+        1, 
+        4, 
+        1,
+        help="Some models may limit the number of images"
+    )
+    
     st.markdown("---")
-    st.markdown("Built with Together AI")
-
-# Main chat interface
-st.title("Image Generation Chatbot")
-st.caption("Describe the image you want to generate and I'll create it for you!")
+    st.markdown("💡 Tip: Use descriptive prompts for best results")
 
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat messages from history
+# Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -61,7 +85,35 @@ for message in st.session_state.messages:
                 with cols[idx]:
                     st.image(img_data, use_column_width=True)
 
-# Accept user input
+# Main chat function
+def generate_images(prompt, model_info, num_images=1, steps=20):
+    try:
+        client = Together(api_key=together_api)
+        response = client.images.generate(
+            prompt=prompt,
+            model=model_info["model"],
+            steps=steps,
+            n=num_images
+        )
+        
+        generated_images = []
+        for img_data in response.data[:num_images]:
+            if not hasattr(img_data, 'b64_json') or not img_data.b64_json:
+                raise ValueError("Invalid image data received from API")
+            
+            try:
+                image_bytes = base64.b64decode(img_data.b64_json)
+                image = Image.open(BytesIO(image_bytes))
+                generated_images.append(image)
+            except Exception as e:
+                raise ValueError(f"Failed to decode image: {str(e)}")
+        
+        return generated_images
+    
+    except Exception as e:
+        raise RuntimeError(f"API Error: {str(e)}")
+
+# Handle user input
 if prompt := st.chat_input("Describe the image you want to create..."):
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -69,56 +121,57 @@ if prompt := st.chat_input("Describe the image you want to create..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     
     with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        message_placeholder.markdown("Generating your images...")
+        status_message = st.empty()
+        status_message.markdown("🔄 Generating your images...")
         
         try:
             if not together_api:
-                raise ValueError("API token not provided")
+                raise ValueError("Please enter your API key in the sidebar")
             
-            client = Together(api_key=together_api)
-            
-            response = client.images.generate(
+            start_time = time.time()
+            images = generate_images(
                 prompt=prompt,
-                model=SERVERLESS_MODELS[model_name],
-                steps=steps,
-                n=num_images
+                model_info=SERVERLESS_MODELS[model_name],
+                num_images=num_images,
+                steps=steps
             )
+            generation_time = time.time() - start_time
             
-            generated_images = []
-            cols = st.columns(num_images)
+            status_message.empty()
             
-            for idx, img_data in enumerate(response.data[:num_images]):
-                if hasattr(img_data, 'b64_json'):
-                    image_bytes = base64.b64decode(img_data.b64_json)
-                    image = Image.open(BytesIO(image_bytes))
-                    generated_images.append(image)
-                    
+            if images:
+                cols = st.columns(len(images))
+                for idx, image in enumerate(images):
                     with cols[idx]:
                         st.image(image, use_column_width=True)
-            
-            message_placeholder.empty()
-            st.markdown(f"Generated {len(generated_images)} image(s) based on: '{prompt}'")
-            
-            st.session_state.messages.append({
-                "role": "assistant", 
-                "content": f"Generated {len(generated_images)} image(s) based on: '{prompt}'",
-                "images": generated_images
-            })
-            
+                
+                st.success(f"Generated {len(images)} image(s) in {generation_time:.1f}s")
+                
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"Generated {len(images)} image(s) based on: '{prompt}'",
+                    "images": images
+                })
+            else:
+                st.error("No images were generated")
+        
         except Exception as e:
-            message_placeholder.error(f"Error generating images: {str(e)}")
+            status_message.error(f"❌ Error: {str(e)}")
             st.session_state.messages.append({
-                "role": "assistant", 
-                "content": f"Sorry, I couldn't generate the images. Error: {str(e)}"
+                "role": "assistant",
+                "content": f"Failed to generate images: {str(e)}"
             })
 
-# Display help in sidebar
-with st.sidebar.expander("Help"):
+# Add help section
+with st.sidebar.expander("Prompt Guide"):
     st.write("""
-    **Tips for better results:**
-    - Be specific in your descriptions
-    - Include style references (e.g., "photorealistic", "anime style")
-    - For multiple concepts, separate with commas
-    - Try different models for different styles
+    **Better Prompt Examples:**
+    - "A majestic lion in the savanna at sunset, photorealistic, 8K"
+    - "Cyberpunk city street at night, neon lights, rain puddles"
+    - "Cute anime-style cat wearing a wizard hat, fantasy background"
+    
+    **Advanced Tips:**
+    - Include style references (photo, painting, digital art)
+    - Specify lighting (sunset, studio lighting, neon)
+    - Add details (4K, ultra-detailed, intricate)
     """)
