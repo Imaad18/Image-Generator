@@ -7,6 +7,15 @@ from PIL import Image
 # Set up the page
 st.set_page_config(page_title="Image Generation Chatbot", page_icon="🖼️")
 
+# Serverless-compatible models
+SERVERLESS_MODELS = {
+    "FLUX-1 (Recommended)": "black-forest-labs/FLUX.1-dev",
+    "SDXL 1.0": "stability-ai/sdxl",
+    "Playground v2": "playgroundai/playground-v2-1024px-aesthetic",
+    "Kandinsky 2.2": "kandinsky-community/kandinsky-2-2-decoder",
+    "Realistic Vision": "SG161222/Realistic_Vision_V5.1_noVAE"
+}
+
 # Sidebar for API key and settings
 with st.sidebar:
     st.title("🖼️ Image Generation Chatbot")
@@ -17,30 +26,22 @@ with st.sidebar:
         together_api = st.secrets['TOGETHER_API_KEY']
     else:
         together_api = st.text_input('Enter Together API token:', type='password')
-        if not together_api.startswith(''):
+        if not together_api:
             st.warning('Please enter your Together API token!', icon='⚠️')
         else:
             st.success('API key entered!', icon='✅')
     
     st.subheader("Image Settings")
-    num_images = st.slider("Number of images", 1, 8, 4)
-    steps = st.slider("Generation steps", 5, 50, 10)
-    model = st.selectbox(
+    num_images = st.slider("Number of images", 1, 4, 1)
+    steps = st.slider("Generation steps", 10, 50, 20)
+    model_name = st.selectbox(
         "Model",
-        [
-            "black-forest-labs/FLUX.1-dev",
-            "stability-ai/sdxl",
-            "runwayml/stable-diffusion-v1-5"
-        ],
+        list(SERVERLESS_MODELS.keys()),
         index=0
     )
     
     st.markdown("---")
     st.markdown("Built with Together AI")
-
-# Store generated images
-if 'generated_images' not in st.session_state:
-    st.session_state['generated_images'] = []
 
 # Main chat interface
 st.title("Image Generation Chatbot")
@@ -50,7 +51,7 @@ st.caption("Describe the image you want to generate and I'll create it for you!"
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat messages from history on app rerun
+# Display chat messages from history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -62,30 +63,24 @@ for message in st.session_state.messages:
 
 # Accept user input
 if prompt := st.chat_input("Describe the image you want to create..."):
-    # Display user message in chat message container
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    # Display assistant response in chat message container
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         message_placeholder.markdown("Generating your images...")
         
         try:
             if not together_api:
-                st.error("Please enter a valid Together API token in the sidebar!")
-                st.stop()
+                raise ValueError("API token not provided")
             
-            # Initialize Together client
             client = Together(api_key=together_api)
             
-            # Generate images
             response = client.images.generate(
                 prompt=prompt,
-                model=model,
+                model=SERVERLESS_MODELS[model_name],
                 steps=steps,
                 n=num_images
             )
@@ -95,24 +90,19 @@ if prompt := st.chat_input("Describe the image you want to create..."):
             
             for idx, img_data in enumerate(response.data[:num_images]):
                 if hasattr(img_data, 'b64_json'):
-                    # Decode base64 image
                     image_bytes = base64.b64decode(img_data.b64_json)
                     image = Image.open(BytesIO(image_bytes))
                     generated_images.append(image)
                     
-                    # Display in column
                     with cols[idx]:
                         st.image(image, use_column_width=True)
             
-            st.session_state.generated_images.extend(generated_images)
-            
             message_placeholder.empty()
-            st.markdown(f"Here are your generated images based on: '{prompt}'")
+            st.markdown(f"Generated {len(generated_images)} image(s) based on: '{prompt}'")
             
-            # Add assistant response to chat history
             st.session_state.messages.append({
                 "role": "assistant", 
-                "content": f"Here are your generated images based on: '{prompt}'",
+                "content": f"Generated {len(generated_images)} image(s) based on: '{prompt}'",
                 "images": generated_images
             })
             
@@ -123,9 +113,12 @@ if prompt := st.chat_input("Describe the image you want to create..."):
                 "content": f"Sorry, I couldn't generate the images. Error: {str(e)}"
             })
 
-# Display generated images in sidebar
-if st.session_state.generated_images:
-    with st.sidebar.expander("Generated Images"):
-        for i, image in enumerate(st.session_state.generated_images):
-            st.write(f"Image {i+1}")
-            st.image(image, use_column_width=True)
+# Display help in sidebar
+with st.sidebar.expander("Help"):
+    st.write("""
+    **Tips for better results:**
+    - Be specific in your descriptions
+    - Include style references (e.g., "photorealistic", "anime style")
+    - For multiple concepts, separate with commas
+    - Try different models for different styles
+    """)
