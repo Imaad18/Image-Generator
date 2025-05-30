@@ -1,3 +1,9 @@
+![scrnli_euvw056MsaBeDY](https://github.com/user-attachments/assets/29929398-2c00-44b7-9ba2-5efa8c407ed4)
+
+
+# Live Demo in Web App:
+https://image-generator-juqfjqnuixamszn8vdyup8.streamlit.app/
+
 # 🚀 NexusAI Studio
 
 * A modern, futuristic AI creative suite built with Streamlit for text and image generation using Together AI's powerful models.
