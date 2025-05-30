@@ -550,6 +550,9 @@ with tab1:
                 st.error(f"Failed to generate text: {str(e)}")
         
         # Handle image generation
+       # ... (keep all the previous code the same until the image generation section)
+
+        # Handle image generation
         if generate_image_btn and prompt.strip():
             try:
                 client = Together(api_key=api_key)
@@ -576,62 +579,64 @@ with tab1:
                         st.session_state.generated_images = []
                         
                         # Create responsive grid
-                        if len(response.data) <= 2:
-                            cols = st.columns(len(response.data))
-                        else:
-                            cols = st.columns(2)
-                            for i in range(2, len(response.data)):
-                                cols += st.columns(2)
+                        cols = st.columns(2)  # Always use 2 columns for consistency
                         
                         for i, image_data in enumerate(response.data):
-                            col_idx = i % len(cols)
+                            col_idx = i % 2  # Alternate between columns
                             
                             with cols[col_idx]:
-                                st.markdown('<div class="generated-card">', unsafe_allow_html=True)
-                                
-                                try:
-                                    b64_data = None
-                                    if hasattr(image_data, 'b64_json') and image_data.b64_json:
-                                        b64_data = image_data.b64_json
-                                    elif hasattr(image_data, 'base64') and image_data.base64:
-                                        b64_data = image_data.base64
-                                    elif hasattr(image_data, 'data') and image_data.data:
-                                        b64_data = image_data.data
-                                    elif hasattr(image_data, 'url') and image_data.url:
-                                        st.image(image_data.url, caption=f"Generated Image {i+1}")
+                                with st.container():
+                                    st.markdown('<div class="generated-card">', unsafe_allow_html=True)
                                     
-                                    if b64_data:
-                                        image_bytes = base64.b64decode(b64_data)
-                                        image = Image.open(BytesIO(image_bytes))
+                                    try:
+                                        b64_data = None
+                                        if hasattr(image_data, 'b64_json') and image_data.b64_json:
+                                            b64_data = image_data.b64_json
+                                        elif hasattr(image_data, 'base64') and image_data.base64:
+                                            b64_data = image_data.base64
+                                        elif hasattr(image_data, 'data') and image_data.data:
+                                            b64_data = image_data.data
+                                        elif hasattr(image_data, 'url') and image_data.url:
+                                            st.image(image_data.url, caption=f"Generated Image {i+1}")
                                         
-                                        st.image(
-                                            image,
-                                            caption=f"🎨 Variation {i+1}",
-                                            use_container_width=True
-                                        )
-                                        
-                                        # Save image to session state for download
-                                        img_buffer = BytesIO()
-                                        image.save(img_buffer, format='PNG')
-                                        img_bytes = img_buffer.getvalue()
-                                        st.session_state.generated_images.append(img_bytes)
-                                        
-                                        # Download button for each image
-                                        st.download_button(
-                                            label=f"📥 Download Image {i+1}",
-                                            data=img_bytes,
-                                            file_name=f"nexus_ai_image_{i+1}.png",
-                                            mime="image/png",
-                                            use_container_width=True,
-                                            key=f"download_{i}"
-                                        )
-                                    else:
-                                        st.error("Unable to process image data")
-                                
-                                except Exception as img_error:
-                                    st.error(f"Error processing image: {str(img_error)}")
-                                
-                                st.markdown('</div>', unsafe_allow_html=True)
+                                        if b64_data:
+                                            image_bytes = base64.b64decode(b64_data)
+                                            image = Image.open(BytesIO(image_bytes))
+                                            
+                                            # Display the image
+                                            st.image(
+                                                image,
+                                                caption=f"🎨 Variation {i+1}",
+                                                use_container_width=True
+                                            )
+                                            
+                                            # Convert image to bytes for download
+                                            buf = BytesIO()
+                                            image.save(buf, format="PNG")
+                                            byte_im = buf.getvalue()
+                                            
+                                            # Add download button below each image
+                                            st.download_button(
+                                                label=f"⬇️ Download Image {i+1}",
+                                                data=byte_im,
+                                                file_name=f"nexusai_image_{i+1}.png",
+                                                mime="image/png",
+                                                key=f"dl_{i}",
+                                                use_container_width=True
+                                            )
+                                            
+                                            # Store image in session state
+                                            if 'generated_images' not in st.session_state:
+                                                st.session_state.generated_images = []
+                                            st.session_state.generated_images.append(byte_im)
+                                            
+                                        else:
+                                            st.error("Unable to process image data")
+                                    
+                                    except Exception as img_error:
+                                        st.error(f"Error processing image: {str(img_error)}")
+                                    
+                                    st.markdown('</div>', unsafe_allow_html=True)
             
             except Exception as e:
                 st.error(f"🚨 Image generation failed: {str(e)}")
@@ -640,6 +645,7 @@ with tab1:
                 elif "rate limit" in str(e).lower():
                     st.info("You've hit the rate limit. Please wait before trying again.")
 
+# ... (keep the rest of the code the same)
 # FIXED: Guide tab content with proper markdown rendering
 with tab2:
     # Using proper st.markdown for headers and content
