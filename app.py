@@ -259,6 +259,17 @@ def inject_css():
             0% { box-shadow: 0 0 10px rgba(0, 245, 212, 0.3); }
             100% { box-shadow: 0 0 20px rgba(0, 245, 212, 0.7); }
         }
+        
+        /* Download button styling */
+        .download-btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .download-all-btn {
+            background: linear-gradient(90deg, #00bbf9, #0088cc) !important;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -561,6 +572,9 @@ with tab1:
                     if response.data:
                         st.success(f"🎉 Generated {len(response.data)} image(s)!")
                         
+                        # Store generated images in session state for download
+                        st.session_state.generated_images = []
+                        
                         # Create responsive grid
                         if len(response.data) <= 2:
                             cols = st.columns(len(response.data))
@@ -596,10 +610,13 @@ with tab1:
                                             use_container_width=True
                                         )
                                         
+                                        # Save image to session state for download
                                         img_buffer = BytesIO()
                                         image.save(img_buffer, format='PNG')
                                         img_bytes = img_buffer.getvalue()
+                                        st.session_state.generated_images.append(img_bytes)
                                         
+                                        # Individual download button
                                         st.download_button(
                                             label=f"📥 Download Image {i+1}",
                                             data=img_bytes,
@@ -615,6 +632,29 @@ with tab1:
                                     st.error(f"Error processing image: {str(img_error)}")
                                 
                                 st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        # Add a "Download All" button if multiple images were generated
+                        if len(response.data) > 1 and 'generated_images' in st.session_state:
+                            # Create a zip file of all images
+                            import zipfile
+                            from datetime import datetime
+                            
+                            zip_buffer = BytesIO()
+                            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                                for idx, img_bytes in enumerate(st.session_state.generated_images):
+                                    zip_file.writestr(f"nexus_ai_image_{idx+1}.png", img_bytes)
+                            
+                            zip_bytes = zip_buffer.getvalue()
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            
+                            st.download_button(
+                                label="📦 Download All Images (ZIP)",
+                                data=zip_bytes,
+                                file_name=f"nexus_ai_images_{timestamp}.zip",
+                                mime="application/zip",
+                                use_container_width=True,
+                                key="download_all"
+                            )
                     else:
                         st.error("No images were generated. Please try adjusting your prompt.")
             
