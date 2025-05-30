@@ -50,28 +50,17 @@ def inject_css():
         }
         
         /* Text input styling - FIXED for visibility */
+        .stTextInput input,
         .stTextArea textarea {
             background: rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
+            color: white !important;
             border: 1px solid #00f5d466 !important;
             border-radius: 12px !important;
             padding: 12px !important;
             font-size: 14px !important;
         }
         
-        .stTextArea textarea::placeholder {
-            color: rgba(255, 255, 255, 0.5) !important;
-        }
-        
-        .stTextInput input {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
-            border: 1px solid #00f5d466 !important;
-            border-radius: 12px !important;
-            padding: 12px !important;
-            font-size: 14px !important;
-        }
-        
+        .stTextArea textarea::placeholder,
         .stTextInput input::placeholder {
             color: rgba(255, 255, 255, 0.5) !important;
         }
@@ -79,14 +68,14 @@ def inject_css():
         /* Password input specific styling */
         .stTextInput input[type="password"] {
             background: rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
+            color: white !important;
             border: 1px solid #00f5d466 !important;
         }
         
         /* Select box styling - FIXED for visibility */
         .stSelectbox select {
             background: rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
+            color: white !important;
             border: 1px solid #00f5d466 !important;
             border-radius: 12px !important;
             padding: 8px !important;
@@ -95,7 +84,7 @@ def inject_css():
         
         .stSelectbox > div > div {
             background: rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
+            color: white !important;
             border: 1px solid #00f5d466 !important;
         }
         
@@ -106,12 +95,12 @@ def inject_css():
         
         .stSelectbox [role="option"] {
             background: rgba(15, 12, 41, 0.95) !important;
-            color: #ffffff !important;
+            color: white !important;
         }
         
         .stSelectbox [role="option"]:hover {
             background: rgba(0, 245, 212, 0.2) !important;
-            color: #ffffff !important;
+            color: white !important;
         }
         
         /* Slider styling */
@@ -136,7 +125,7 @@ def inject_css():
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             margin-bottom: 25px;
             transition: all 0.3s ease;
-            color: #ffffff;
+            color: white;
         }
         
         .generated-card:hover {
@@ -173,7 +162,7 @@ def inject_css():
         }
         
         label {
-            color: #ffffff !important;
+            color: white !important;
             font-weight: 500 !important;
         }
         
@@ -185,7 +174,7 @@ def inject_css():
         /* Expander styling */
         .streamlit-expanderHeader {
             background: rgba(255, 255, 255, 0.05) !important;
-            color: #ffffff !important;
+            color: white !important;
             border-radius: 8px !important;
         }
         
@@ -215,25 +204,25 @@ def inject_css():
         .stSuccess {
             background: rgba(0, 245, 212, 0.1) !important;
             border: 1px solid rgba(0, 245, 212, 0.3) !important;
-            color: #ffffff !important;
+            color: white !important;
         }
         
         .stError {
             background: rgba(255, 82, 82, 0.1) !important;
             border: 1px solid rgba(255, 82, 82, 0.3) !important;
-            color: #ffffff !important;
+            color: white !important;
         }
         
         .stWarning {
             background: rgba(255, 193, 7, 0.1) !important;
             border: 1px solid rgba(255, 193, 7, 0.3) !important;
-            color: #ffffff !important;
+            color: white !important;
         }
         
         .stInfo {
             background: rgba(0, 123, 255, 0.1) !important;
             border: 1px solid rgba(0, 123, 255, 0.3) !important;
-            color: #ffffff !important;
+            color: white !important;
         }
         
         /* Footer styling */
@@ -255,11 +244,6 @@ def inject_css():
         @keyframes glow-pulse {
             0% { box-shadow: 0 0 10px rgba(0, 245, 212, 0.3); }
             100% { box-shadow: 0 0 20px rgba(0, 245, 212, 0.7); }
-        }
-        
-        /* Ensure all text is visible */
-        * {
-            color: inherit !important;
         }
         
         /* Input focus states */
