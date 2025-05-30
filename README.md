@@ -96,3 +96,17 @@ Getting Started:
 * FLUX.1-dev (High quality)
 
 * FLUX.1-schnell (Fast generation)
+
+
+# 🙏 Acknowledgments
+
+* Together AI for providing powerful AI models
+
+* Streamlit team for the amazing framework
+  
+* Black Forest Labs for FLUX models
+
+* DeepSeek and Meta for language models
+
+
+# Built with ❤️ for the AI creative community  
