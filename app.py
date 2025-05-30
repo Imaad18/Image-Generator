@@ -616,7 +616,7 @@ with tab1:
                                         img_bytes = img_buffer.getvalue()
                                         st.session_state.generated_images.append(img_bytes)
                                         
-                                        # Individual download button
+                                        # Download button for each image
                                         st.download_button(
                                             label=f"📥 Download Image {i+1}",
                                             data=img_bytes,
@@ -632,31 +632,6 @@ with tab1:
                                     st.error(f"Error processing image: {str(img_error)}")
                                 
                                 st.markdown('</div>', unsafe_allow_html=True)
-                        
-                        # Add a "Download All" button if multiple images were generated
-                        if len(response.data) > 1 and 'generated_images' in st.session_state:
-                            # Create a zip file of all images
-                            import zipfile
-                            from datetime import datetime
-                            
-                            zip_buffer = BytesIO()
-                            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                                for idx, img_bytes in enumerate(st.session_state.generated_images):
-                                    zip_file.writestr(f"nexus_ai_image_{idx+1}.png", img_bytes)
-                            
-                            zip_bytes = zip_buffer.getvalue()
-                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                            
-                            st.download_button(
-                                label="📦 Download All Images (ZIP)",
-                                data=zip_bytes,
-                                file_name=f"nexus_ai_images_{timestamp}.zip",
-                                mime="application/zip",
-                                use_container_width=True,
-                                key="download_all"
-                            )
-                    else:
-                        st.error("No images were generated. Please try adjusting your prompt.")
             
             except Exception as e:
                 st.error(f"🚨 Image generation failed: {str(e)}")
