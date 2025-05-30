@@ -49,43 +49,57 @@ def inject_css():
             box-shadow: 0 6px 25px rgba(0, 245, 212, 0.5);
         }
         
-        /* Text input styling - FIXED for visibility */
+        /* FIXED: Text input styling for better visibility */
         .stTextInput input,
         .stTextArea textarea {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: white !important;
-            border: 1px solid #00f5d466 !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border: 2px solid #00f5d466 !important;
             border-radius: 12px !important;
             padding: 12px !important;
             font-size: 14px !important;
+            font-weight: 500 !important;
         }
         
         .stTextArea textarea::placeholder,
         .stTextInput input::placeholder {
-            color: rgba(255, 255, 255, 0.5) !important;
+            color: rgba(255, 255, 255, 0.6) !important;
+            font-weight: 400 !important;
         }
         
-        /* Password input specific styling */
+        /* FIXED: Password input specific styling */
         .stTextInput input[type="password"] {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: white !important;
-            border: 1px solid #00f5d466 !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border: 2px solid #00f5d466 !important;
+            font-weight: 500 !important;
+        }
+        
+        /* FIXED: Input focus states */
+        .stTextInput input:focus,
+        .stTextArea textarea:focus {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-color: #00f5d4 !important;
+            box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.3) !important;
+            outline: none !important;
+            color: #ffffff !important;
         }
         
         /* Select box styling - FIXED for visibility */
         .stSelectbox select {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: white !important;
-            border: 1px solid #00f5d466 !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border: 2px solid #00f5d466 !important;
             border-radius: 12px !important;
             padding: 8px !important;
             font-size: 14px !important;
+            font-weight: 500 !important;
         }
         
         .stSelectbox > div > div {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: white !important;
-            border: 1px solid #00f5d466 !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border: 2px solid #00f5d466 !important;
         }
         
         /* Dropdown options styling */
@@ -245,14 +259,6 @@ def inject_css():
             0% { box-shadow: 0 0 10px rgba(0, 245, 212, 0.3); }
             100% { box-shadow: 0 0 20px rgba(0, 245, 212, 0.7); }
         }
-        
-        /* Input focus states */
-        .stTextInput input:focus,
-        .stTextArea textarea:focus {
-            border-color: #00f5d4 !important;
-            box-shadow: 0 0 0 2px rgba(0, 245, 212, 0.2) !important;
-            outline: none !important;
-        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -307,14 +313,14 @@ with st.sidebar:
             help="Select model for text generation"
         )
         
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: rgba(0, 245, 212, 0.1); padding: 12px; border-radius: 8px; margin-top: 10px;">
             <p style="margin: 0; color: rgba(255, 255, 255, 0.8); font-size: 0.85em;">
-                <strong>Current:</strong> {model}<br>
+                <strong>Current:</strong> {text_model}<br>
                 <strong>Best for:</strong> General text generation and prompt crafting
             </p>
         </div>
-        """.format(model=text_model), unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     with tab_model_image:
         image_model = st.selectbox(
@@ -324,17 +330,15 @@ with st.sidebar:
             help="Select model for image generation"
         )
         
-        st.markdown("""
+        purpose = "High-quality images" if image_model == "black-forest-labs/FLUX.1-dev" else "Fast generation"
+        st.markdown(f"""
         <div style="background: rgba(0, 245, 212, 0.1); padding: 12px; border-radius: 8px; margin-top: 10px;">
             <p style="margin: 0; color: rgba(255, 255, 255, 0.8); font-size: 0.85em;">
-                <strong>Current:</strong> {model}<br>
+                <strong>Current:</strong> {image_model}<br>
                 <strong>Best for:</strong> {purpose}
             </p>
         </div>
-        """.format(
-            model=image_model,
-            purpose="High-quality images" if image_model == "black-forest-labs/FLUX.1-dev" else "Fast generation"
-        ), unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     # Generation parameters
     with st.expander("🎛️ Image Settings", expanded=True):
@@ -621,49 +625,37 @@ with tab1:
                 elif "rate limit" in str(e).lower():
                     st.info("You've hit the rate limit. Please wait before trying again.")
 
+# FIXED: Guide tab content with proper markdown rendering
 with tab2:
-    st.markdown("""
-    <div style="max-width: 800px; margin: 0 auto;">
-        <h2 style="color: #00f5d4; border-bottom: 1px solid rgba(0, 245, 212, 0.3); padding-bottom: 10px;">📚 User Guide</h2>
-        
-        <div style="margin-top: 30px;">
-            <h3 style="color: #00f5d4;">🔮 Two-Step Generation Process</h3>
-            <ol style="color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
-                <li><strong>Generate a Professional Prompt:</strong> Describe your basic idea in the "Generate AI-Powered Prompt" section and let the AI craft a detailed prompt for you</li>
-                <li><strong>Create Your Artwork:</strong> Use the generated prompt (or your own) to produce stunning images with the image generation models</li>
-            </ol>
-            
-            <div style="background: rgba(0, 245, 212, 0.1); padding: 20px; border-radius: 12px; margin: 20px 0;">
-                <h4 style="color: #00f5d4; margin-top: 0;">💎 Pro Tip</h4>
-                <p style="color: rgba(255, 255, 255, 0.8);">
-                    The AI can help you refine vague ideas into professional-grade prompts. Start with a simple concept like "a cat in space" and let the system expand it into a detailed description.
-                </p>
-            </div>
-        </div>
-        
-        <div style="margin-top: 40px;">
-            <h3 style="color: #00f5d4;">🖼️ Image Generation Tips</h3>
-            <div style="background: rgba(0, 245, 212, 0.1); padding: 20px; border-radius: 12px; margin-top: 15px;">
-                <h4 style="margin-top: 0; color: #00f5d4;">Prompt Structure</h4>
-                <ul style="color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
-                    <li><strong>Subject:</strong> Clear main focus (e.g., "cyberpunk samurai warrior")</li>
-                    <li><strong>Style:</strong> Artistic style (e.g., "digital art, hyper-detailed, Unreal Engine 5")</li>
-                    <li><strong>Lighting:</strong> "cinematic lighting, neon glow, volumetric fog"</li>
-                    <li><strong>Details:</strong> "intricate armor, reflective surfaces, dynamic pose"</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div style="margin-top: 40px;">
-            <h3 style="color: #00f5d4;">⚙️ Technical Settings</h3>
-            <div style="color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
-                <p><strong>Steps (20-30):</strong> Balances quality and generation time</p>
-                <p><strong>Resolution (1024x1024):</strong> Higher values produce more detail but use more credits</p>
-                <p><strong>Negative Prompts:</strong> Remove unwanted elements like "blurry, distorted, extra limbs"</p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Using proper st.markdown for headers and content
+    st.header("📚 User Guide")
+    
+    st.subheader("🔮 Two-Step Generation Process")
+    st.write("""
+    1. **Generate a Professional Prompt:** Describe your basic idea in the "Generate AI-Powered Prompt" section and let the AI craft a detailed prompt for you
+    2. **Create Your Artwork:** Use the generated prompt (or your own) to produce stunning images with the image generation models
+    """)
+    
+    st.info("""
+    **💎 Pro Tip:** The AI can help you refine vague ideas into professional-grade prompts. Start with a simple concept like "a cat in space" and let the system expand it into a detailed description.
+    """)
+    
+    st.subheader("🖼️ Image Generation Tips")
+    
+    st.markdown("#### Prompt Structure")
+    st.write("""
+    - **Subject:** Clear main focus (e.g., "cyberpunk samurai warrior")
+    - **Style:** Artistic style (e.g., "digital art, hyper-detailed, Unreal Engine 5")
+    - **Lighting:** "cinematic lighting, neon glow, volumetric fog"
+    - **Details:** "intricate armor, reflective surfaces, dynamic pose"
+    """)
+    
+    st.subheader("⚙️ Technical Settings")
+    st.write("""
+    - **Steps (20-30):** Balances quality and generation time
+    - **Resolution (1024x1024):** Higher values produce more detail but use more credits
+    - **Negative Prompts:** Remove unwanted elements like "blurry, distorted, extra limbs"
+    """)
 
 # Footer
 st.markdown("""
