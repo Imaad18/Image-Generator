@@ -49,22 +49,69 @@ def inject_css():
             box-shadow: 0 6px 25px rgba(0, 245, 212, 0.5);
         }
         
-        /* Text input styling */
-        .stTextArea textarea, .stTextInput input {
+        /* Text input styling - FIXED for visibility */
+        .stTextArea textarea {
             background: rgba(255, 255, 255, 0.08) !important;
-            color: white !important;
-            border: 1px solid #00f5d433 !important;
+            color: #ffffff !important;
+            border: 1px solid #00f5d466 !important;
             border-radius: 12px !important;
             padding: 12px !important;
+            font-size: 14px !important;
         }
         
-        /* Select box styling */
+        .stTextArea textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .stTextInput input {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+            border: 1px solid #00f5d466 !important;
+            border-radius: 12px !important;
+            padding: 12px !important;
+            font-size: 14px !important;
+        }
+        
+        .stTextInput input::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        /* Password input specific styling */
+        .stTextInput input[type="password"] {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+            border: 1px solid #00f5d466 !important;
+        }
+        
+        /* Select box styling - FIXED for visibility */
         .stSelectbox select {
             background: rgba(255, 255, 255, 0.08) !important;
-            color: white !important;
-            border: 1px solid #00f5d433 !important;
-            border-radius: 12px;
-            padding: 8px;
+            color: #ffffff !important;
+            border: 1px solid #00f5d466 !important;
+            border-radius: 12px !important;
+            padding: 8px !important;
+            font-size: 14px !important;
+        }
+        
+        .stSelectbox > div > div {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+            border: 1px solid #00f5d466 !important;
+        }
+        
+        /* Dropdown options styling */
+        .stSelectbox [data-baseweb="select"] {
+            background: rgba(15, 12, 41, 0.95) !important;
+        }
+        
+        .stSelectbox [role="option"] {
+            background: rgba(15, 12, 41, 0.95) !important;
+            color: #ffffff !important;
+        }
+        
+        .stSelectbox [role="option"]:hover {
+            background: rgba(0, 245, 212, 0.2) !important;
+            color: #ffffff !important;
         }
         
         /* Slider styling */
@@ -89,6 +136,7 @@ def inject_css():
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             margin-bottom: 25px;
             transition: all 0.3s ease;
+            color: #ffffff;
         }
         
         .generated-card:hover {
@@ -119,6 +167,33 @@ def inject_css():
             box-shadow: 0 4px 15px rgba(0, 245, 212, 0.3);
         }
         
+        /* Labels and text styling */
+        .stMarkdown p, .stMarkdown li {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        
+        label {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Help text styling */
+        .stMarkdown small {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+        
+        /* Expander styling */
+        .streamlit-expanderHeader {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+        }
+        
+        .streamlit-expanderContent {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-radius: 0 0 8px 8px !important;
+        }
+        
         /* Tooltip styling */
         .stTooltip {
             background: #0f0c29 !important;
@@ -134,6 +209,31 @@ def inject_css():
             border-top: 3px solid #00f5d4;
             width: 30px;
             height: 30px;
+        }
+        
+        /* Success/Error message styling */
+        .stSuccess {
+            background: rgba(0, 245, 212, 0.1) !important;
+            border: 1px solid rgba(0, 245, 212, 0.3) !important;
+            color: #ffffff !important;
+        }
+        
+        .stError {
+            background: rgba(255, 82, 82, 0.1) !important;
+            border: 1px solid rgba(255, 82, 82, 0.3) !important;
+            color: #ffffff !important;
+        }
+        
+        .stWarning {
+            background: rgba(255, 193, 7, 0.1) !important;
+            border: 1px solid rgba(255, 193, 7, 0.3) !important;
+            color: #ffffff !important;
+        }
+        
+        .stInfo {
+            background: rgba(0, 123, 255, 0.1) !important;
+            border: 1px solid rgba(0, 123, 255, 0.3) !important;
+            color: #ffffff !important;
         }
         
         /* Footer styling */
@@ -155,6 +255,19 @@ def inject_css():
         @keyframes glow-pulse {
             0% { box-shadow: 0 0 10px rgba(0, 245, 212, 0.3); }
             100% { box-shadow: 0 0 20px rgba(0, 245, 212, 0.7); }
+        }
+        
+        /* Ensure all text is visible */
+        * {
+            color: inherit !important;
+        }
+        
+        /* Input focus states */
+        .stTextInput input:focus,
+        .stTextArea textarea:focus {
+            border-color: #00f5d4 !important;
+            box-shadow: 0 0 0 2px rgba(0, 245, 212, 0.2) !important;
+            outline: none !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -308,7 +421,8 @@ with tab1:
                 "**Describe your idea**",
                 height=100,
                 placeholder="Example: 'I want an image of a futuristic city'",
-                help="Let AI help you craft a professional prompt"
+                help="Let AI help you craft a professional prompt",
+                key="prompt_idea"
             )
             
             generate_prompt_btn = st.button(
@@ -322,7 +436,9 @@ with tab1:
             "**Your Final Prompt**",
             height=150,
             placeholder="Example: 'A futuristic cyberpunk cityscape at night, neon lights reflecting on wet streets, 4K hyper-detailed'",
-            help="This will be used for image generation"
+            help="This will be used for image generation",
+            key="main_prompt",
+            value=st.session_state.get('generated_prompt', '')
         )
         
         # Negative prompt
@@ -330,7 +446,8 @@ with tab1:
             "**Exclusion Terms**",
             height=80,
             placeholder="What you don't want in the image (optional)",
-            help="Specify elements to exclude from generated images"
+            help="Specify elements to exclude from generated images",
+            key="negative_prompt"
         )
         
         # Generate buttons
@@ -384,7 +501,6 @@ with tab1:
                             ]
                         )
                         generated_prompt = response.choices[0].message.content
-                        prompt = generated_prompt  # Auto-fill the main prompt
                         st.session_state.generated_prompt = generated_prompt
                     
                     st.success("✨ Here's your AI-crafted prompt:")
@@ -398,6 +514,8 @@ with tab1:
                         mime="text/plain",
                         use_container_width=True
                     )
+                    
+                    st.rerun()  # Refresh to show the prompt in the text area
                 
                 except Exception as e:
                     st.error(f"Failed to generate prompt: {str(e)}")
