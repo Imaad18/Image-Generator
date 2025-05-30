@@ -259,17 +259,6 @@ def inject_css():
             0% { box-shadow: 0 0 10px rgba(0, 245, 212, 0.3); }
             100% { box-shadow: 0 0 20px rgba(0, 245, 212, 0.7); }
         }
-        
-        /* Download button styling */
-        .download-btn-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .download-all-btn {
-            background: linear-gradient(90deg, #00bbf9, #0088cc) !important;
-        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -505,15 +494,6 @@ with tab1:
                     st.success("✨ Here's your AI-crafted prompt:")
                     st.markdown(f'<div class="generated-card" style="padding: 15px; margin-bottom: 20px;">{generated_prompt}</div>', unsafe_allow_html=True)
                     
-                    # Copy button for the prompt
-                    st.download_button(
-                        label="📋 Copy Prompt",
-                        data=generated_prompt,
-                        file_name="ai_generated_prompt.txt",
-                        mime="text/plain",
-                        use_container_width=True
-                    )
-                    
                     st.rerun()  # Refresh to show the prompt in the text area
                 
                 except Exception as e:
@@ -536,22 +516,10 @@ with tab1:
                 
                 st.success("📚 Generated Text:")
                 st.markdown(f'<div class="generated-card">{generated_text}</div>', unsafe_allow_html=True)
-                
-                # Download button for the text
-                st.download_button(
-                    label="📥 Download Text",
-                    data=generated_text,
-                    file_name="ai_generated_text.txt",
-                    mime="text/plain",
-                    use_container_width=True
-                )
             
             except Exception as e:
                 st.error(f"Failed to generate text: {str(e)}")
         
-        # Handle image generation
-       # ... (keep all the previous code the same until the image generation section)
-
         # Handle image generation
         if generate_image_btn and prompt.strip():
             try:
@@ -574,9 +542,6 @@ with tab1:
                     
                     if response.data:
                         st.success(f"🎉 Generated {len(response.data)} image(s)!")
-                        
-                        # Store generated images in session state for download
-                        st.session_state.generated_images = []
                         
                         # Create responsive grid
                         cols = st.columns(2)  # Always use 2 columns for consistency
@@ -610,26 +575,6 @@ with tab1:
                                                 use_container_width=True
                                             )
                                             
-                                            # Convert image to bytes for download
-                                            buf = BytesIO()
-                                            image.save(buf, format="PNG")
-                                            byte_im = buf.getvalue()
-                                            
-                                            # Add download button below each image
-                                            st.download_button(
-                                                label=f"⬇️ Download Image {i+1}",
-                                                data=byte_im,
-                                                file_name=f"nexusai_image_{i+1}.png",
-                                                mime="image/png",
-                                                key=f"dl_{i}",
-                                                use_container_width=True
-                                            )
-                                            
-                                            # Store image in session state
-                                            if 'generated_images' not in st.session_state:
-                                                st.session_state.generated_images = []
-                                            st.session_state.generated_images.append(byte_im)
-                                            
                                         else:
                                             st.error("Unable to process image data")
                                     
@@ -645,7 +590,6 @@ with tab1:
                 elif "rate limit" in str(e).lower():
                     st.info("You've hit the rate limit. Please wait before trying again.")
 
-# ... (keep the rest of the code the same)
 # FIXED: Guide tab content with proper markdown rendering
 with tab2:
     # Using proper st.markdown for headers and content
